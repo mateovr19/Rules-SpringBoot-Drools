@@ -1,0 +1,125 @@
+package rules
+
+import com.udea.bankrules.model.Passenger
+import com.udea.bankrules.model.Flight
+import com.udea.bankrules.model.AirlineRequest
+import com.udea.bankrules.model.AirlineResponse
+
+// Regla 1: Upgrade a clase ejecutiva para frecuentes con retraso > 60 min
+rule "UpgradeToBusinessClassForFrequentFlyersWithDelays"
+    when
+        $req : AirlineRequest(
+            passenger.membershipStatus in ("Gold", "Platinum"),
+            flight.delayMinutes > 60
+        )
+        $res : AirlineResponse()
+    then
+        $res.setUpgradedToBusinessClass(true);
+        $res.getAppliedRules().add("Regla 1: Ascenso a clase ejecutiva por retraso y membresía.");
+end
+
+// Regla 2: Check-in prioritario para mayores de 65
+rule "PriorityCheckInForSeniors"
+    when
+        $req : AirlineRequest(passenger.age > 65)
+        $res : AirlineResponse()
+    then
+        $res.setPriorityCheckIn(true);
+        $res.getAppliedRules().add("Regla 2: Check-in prioritario para adulto mayor.");
+end
+
+// Regla 3: Descuento del 10% por equipaje menor a 10 kg
+rule "DiscountForLightLuggage"
+    when
+        $req : AirlineRequest(passenger.luggageWeight < 10)
+        $res : AirlineResponse()
+    then
+        $res.setDiscount(10.0);
+        $res.getAppliedRules().add("Regla 3: Descuento del 10% por equipaje ligero.");
+end
+
+// Regla 4: No elegible para ascenso si equipaje > 23 kg
+rule "DenyUpgradeForOverweightLuggage"
+    when
+        $req : AirlineRequest(passenger.luggageWeight > 23)
+        $res : AirlineResponse()
+    then
+        $res.setEligibleForUpgrade(false);
+        $res.getAppliedRules().add("Regla 4: No elegible para ascenso por exceso de equipaje.");
+end
+
+// Regla 5: Asiento de salida de emergencia para adultos jóvenes
+rule "AssignEmergencyExitSeatToYoungAdults"
+    when
+        $req : AirlineRequest(
+            passenger.age >= 18,
+            passenger.age <= 40,
+            passenger.seatPreference == "Any",
+            flight.emergencyExitSeatAvailable == true
+        )
+        $res : AirlineResponse()
+    then
+        $res.setAssignedSeat("Salida de emergencia");
+        $res.getAppliedRules().add("Regla 5: Asiento de salida de emergencia asignado.");
+end
+
+// Regla 6: Compensación de $200 por retraso > 180 minutos
+rule "CompensationForExtremeDelays"
+    when
+        $req : AirlineRequest(flight.delayMinutes > 180)
+        $res : AirlineResponse()
+    then
+        $res.setCompensation(200.0);
+        $res.getAppliedRules().add("Regla 6: Compensación de $200 por retraso extremo.");
+end
+
+// Regla 7: 500 puntos de lealtad en vuelos > 5 horas para no-Basic
+rule "ExtraLoyaltyPointsForLongFlights"
+    when
+        $req : AirlineRequest(
+            passenger.membershipStatus != "Basic",
+            flight.durationHours > 5
+        )
+        $res : AirlineResponse()
+    then
+        $res.setLoyaltyPointsAdded(500);
+        $res.getAppliedRules().add("Regla 7: 500 puntos de lealtad por vuelo largo.");
+end
+
+// Regla 8: Equipaje no permitido si > 15 kg en vuelo < 2 horas
+rule "RestrictLuggageOnShortFlights"
+    when
+        $req : AirlineRequest(
+            passenger.luggageWeight > 15,
+            flight.durationHours < 2
+        )
+        $res : AirlineResponse()
+    then
+        $res.setLuggageAllowed(false);
+        $res.getAppliedRules().add("Regla 8: Equipaje no permitido en vuelo corto con exceso de peso.");
+end
+
+// Regla 9: Acceso al salón VIP para miembros Platinum
+rule "VipLoungeAccessForPlatinumMembers"
+    when
+        $req : AirlineRequest(passenger.membershipStatus == "Platinum")
+        $res : AirlineResponse()
+    then
+        $res.setVipLoungeAccess(true);
+        $res.getAppliedRules().add("Regla 9: Acceso al salón VIP para miembro Platinum.");
+end
+
+// Regla 10: Asiento preferencial para familias
+rule "PreferentialSeatForFamilies"
+    when
+        $req : AirlineRequest(
+            passenger.travelingWithChildren == true,
+            passenger.seatPreference == "Any"
+        )
+        $res : AirlineResponse()
+    then
+        $res.setAssignedSeat("Asiento preferencial familiar");
+        $res.getAppliedRules().add("Regla 10: Asiento preferencial asignado para familia.");
+end
+
+
