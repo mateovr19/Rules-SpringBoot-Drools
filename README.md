@@ -1,4 +1,4 @@
-# Rules-SpringBoot-Drools ✈️
+# Rules-SpringBoot-Drools
 
 Sistema de reglas de negocio para una aerolínea implementado con **Spring Boot** y **Drools**, como parte del Laboratorio Nro. 2 de Fundamentos de Sistemas de Información - Universidad de Antioquia.
 
